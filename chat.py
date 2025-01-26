@@ -114,7 +114,7 @@ Base your analysis primarily on the provided sections. If the sections don't ful
 def generate_response(
     query: str,
     df: pd.DataFrame,
-    model: str = "gpt-4",
+    model: str = "gpt-3.5-turbo",
     top_n: int = 8
 ) -> Tuple[str, List[Dict]]:
     """Generates a comprehensive response to the tax query."""
@@ -141,7 +141,7 @@ def generate_response(
                 {"role": "user", "content": prompt}
             ],
             temperature=0.3,
-            max_tokens=2000
+            max_tokens=1470
         )
 
         filtered_sections = [
