@@ -184,11 +184,12 @@ def main():
 
     # Query interface
     query = st.text_area(
-        """Enter your tax legislation query: 
-        Note:To get the most accurate and relevant answers, please be as specific as possible with your query. 
-For example, instead of asking 'Tell me about depreciation,' ask 'According to the ITAA 1997, how is the diminishing value method of depreciation calculated?'""",                                                     
-        placeholder="e.g., What are the specific requirements for claiming deductions on prepaid expenses?"
-    )
+    """Enter your tax legislation query:
+
+Note: To get the most accurate and relevant answers, please be as specific as possible with your query.
+For example, instead of asking 'Tell me about depreciation,' ask 'According to the ITAA 1997, how is the diminishing value method of depreciation calculated?'""",
+    placeholder="e.g., What are the specific requirements for claiming deductions on prepaid expenses?"
+)
 
     # Advanced options
     with st.expander("Advanced Options"):
