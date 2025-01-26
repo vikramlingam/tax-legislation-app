@@ -6,6 +6,7 @@ from scipy import spatial
 import streamlit as st
 from typing import Optional, Tuple, List, Dict
 import logging
+from streamlit.runtime.scriptrunner import RerunException
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -17,9 +18,19 @@ EMBEDDING_MODEL = "text-embedding-ada-002"
 TOKEN_BUDGET = 4096 - 500
 MIN_SIMILARITY_SCORE = 0.5
 
+# Global client declaration
+client = None
+
 class TaxAnalysisError(Exception):
     """Custom exception for tax analysis errors"""
     pass
+
+def validate_query(query: str) -> bool:
+    """Validates the input query"""
+    if not query or len(query.strip()) < 10:
+        st.warning("Please enter a more detailed query (at least 10 characters)")
+        return False
+    return True
 
 @st.cache_resource
 def load_data(data_path: str = "tax_embeddings.json") -> Optional[pd.DataFrame]:
@@ -165,7 +176,11 @@ def main():
     st.title("⚖️ Australian Tax Legislation Reference")
 
     # API Key handling
-    api_key = st.secrets["OPENAI_API_KEY"]
+    try:
+        api_key = st.secrets["OPENAI_API_KEY"]
+    except:
+        api_key = None
+
     if not api_key:
         api_key = st.text_input("Enter your OpenAI API key:", type="password")
         if not api_key:
@@ -183,14 +198,13 @@ def main():
         return
 
     # Query interface
-query = st.text_area(
-    """Enter your tax legislation query:
-
+    query = st.text_area(
+        label="""Enter your tax legislation query:
 
 Note: To get the most accurate and relevant answers, please be as specific as possible with your query.
 For example, instead of asking 'Tell me about depreciation,' ask 'According to the ITAA 1997, how is the diminishing value method of depreciation calculated?'""",
-    placeholder="e.g., What are the specific requirements for claiming deductions on prepaid expenses?"
-)
+        placeholder="e.g., What are the specific requirements for claiming deductions on prepaid expenses?"
+    )
 
     # Advanced options
     with st.expander("Advanced Options"):
@@ -203,18 +217,21 @@ For example, instead of asking 'Tell me about depreciation,' ask 'According to t
             model_choice = st.selectbox("Model", GPT_MODELS, index=1)
 
     if st.button("Search Legislation", type="primary"):
-        if not query:
-            st.warning("Please enter a query.")
+        if not validate_query(query):
             return
 
         try:
-            with st.spinner("Searching legislation..."):
+            with st.spinner("Analyzing your query..."):
                 response, relevant_sections = generate_response(
                     query,
                     df,
                     model=model_choice,
                     top_n=num_results
                 )
+
+            if not response:
+                st.warning("No relevant results found. Please try rephrasing your query.")
+                return
 
             # Display analysis
             st.markdown("### Analysis")
@@ -232,6 +249,7 @@ For example, instead of asking 'Tell me about depreciation,' ask 'According to t
             st.error(f"Analysis Error: {str(e)}")
         except Exception as e:
             st.error(f"Unexpected Error: {str(e)}")
+            logger.error(f"Error processing query: {str(e)}", exc_info=True)
 
     # Sidebar information
     with st.sidebar:
