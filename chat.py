@@ -6,7 +6,6 @@ from scipy import spatial
 import streamlit as st
 from typing import Optional, Tuple, List, Dict
 import logging
-from streamlit.runtime.scriptrunner import RerunException
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -18,19 +17,9 @@ EMBEDDING_MODEL = "text-embedding-ada-002"
 TOKEN_BUDGET = 4096 - 500
 MIN_SIMILARITY_SCORE = 0.5
 
-# Global client declaration
-client = None
-
 class TaxAnalysisError(Exception):
     """Custom exception for tax analysis errors"""
     pass
-
-def validate_query(query: str) -> bool:
-    """Validates the input query"""
-    if not query or len(query.strip()) < 10:
-        st.warning("Please enter a more detailed query (at least 10 characters)")
-        return False
-    return True
 
 @st.cache_resource
 def load_data(data_path: str = "tax_embeddings.json") -> Optional[pd.DataFrame]:
@@ -173,44 +162,10 @@ def main():
         layout="wide"
     )
 
-    # Custom CSS
-    st.markdown("""
-        <style>
-        .main-header {
-            font-size: 2.5em;
-            font-weight: bold;
-            margin-bottom: 1em;
-        }
-        .section-header {
-            font-size: 1.5em;
-            font-weight: bold;
-            margin-top: 1em;
-            margin-bottom: 0.5em;
-            color: #1f77b4;
-        }
-        .guidance-text {
-            background-color: #f8f9fa;
-            padding: 1em;
-            border-radius: 5px;
-            margin-bottom: 1em;
-        }
-        .example-query {
-            background-color: #e9ecef;
-            padding: 0.5em;
-            border-left: 3px solid #1f77b4;
-            margin: 0.5em 0;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
-    st.markdown('<div class="main-header">⚖️ Australian Tax Legislation Reference</div>', unsafe_allow_html=True)
+    st.title("⚖️ Australian Tax Legislation Reference")
 
     # API Key handling
-    try:
-        api_key = st.secrets["OPENAI_API_KEY"]
-    except:
-        api_key = None
-
+    api_key = os.getenv('OPENAI_API_KEY')
     if not api_key:
         api_key = st.text_input("Enter your OpenAI API key:", type="password")
         if not api_key:
@@ -228,56 +183,28 @@ def main():
         return
 
     # Query interface
-    st.markdown('<div class="section-header">Enter your Tax Legislation Query</div>', unsafe_allow_html=True)
-    
-    st.markdown('<div class="guidance-text">', unsafe_allow_html=True)
-    st.markdown("""
-    **GUIDANCE FOR OPTIMAL RESULTS:**
-    
-    * Be specific and precise in your query formulation
-    * Include relevant legislative references where known
-    * Specify the tax year or time period if applicable
-    * Reference specific provisions or sections if you're aware of them
-    """)
-    
-    st.markdown("**Example Queries:**")
-    st.markdown("""
-    <div class="example-query">✓ "What are the requirements for claiming home office expenses under ITAA 1997?"</div>
-    <div class="example-query">✓ "How is the diminishing value method of depreciation calculated according to Division 40?"</div>
-    <div class="example-query">✓ "What are the criteria for determining residency status for tax purposes under TR 98/17?"</div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    **Your query should focus on specific aspects of:**
-    * Income Tax Assessment Act 1936
-    * Income Tax Assessment Act 1997
-    * Related tax determinations and rulings
-    """)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # Query input
     query = st.text_area(
-        label="",
-        placeholder="Enter your specific tax legislation query here...",
-        height=150
+        "Enter your tax legislation query:",
+        placeholder="e.g., What are the specific requirements for claiming deductions on prepaid expenses?"
     )
 
     # Advanced options
-    with st.expander("🔧 Advanced Options"):
+    with st.expander("Advanced Options"):
         col1, col2, col3 = st.columns([1, 1, 1])
         with col1:
-            num_results = st.slider("📚 Number of relevant sections:", 1, 10, 5)
+            num_results = st.slider("Number of relevant sections:", 1, 10, 5)
         with col2:
-            similarity_threshold = st.slider("🎯 Minimum similarity score:", 0.0, 1.0, MIN_SIMILARITY_SCORE)
+            similarity_threshold = st.slider("Minimum similarity score:", 0.0, 1.0, MIN_SIMILARITY_SCORE)
         with col3:
-            model_choice = st.selectbox("🤖 Model", GPT_MODELS, index=1)
+            model_choice = st.selectbox("Model", GPT_MODELS, index=1)
 
-    if st.button("🔍 Search Legislation", type="primary"):
-        if not validate_query(query):
+    if st.button("Search Legislation", type="primary"):
+        if not query:
+            st.warning("Please enter a query.")
             return
 
         try:
-            with st.spinner("📚 Analyzing your query..."):
+            with st.spinner("Searching legislation..."):
                 response, relevant_sections = generate_response(
                     query,
                     df,
@@ -285,63 +212,49 @@ def main():
                     top_n=num_results
                 )
 
-            if not response:
-                st.warning("No relevant results found. Please try rephrasing your query.")
-                return
-
             # Display analysis
-            st.markdown('<div class="section-header">📋 Analysis</div>', unsafe_allow_html=True)
+            st.markdown("### Analysis")
             st.markdown(response)
 
             # Display legislative references
-            st.markdown('<div class="section-header">📖 Legislative References</div>', unsafe_allow_html=True)
+            st.markdown("### Legislative References")
             for section in relevant_sections:
-                with st.expander(f"📑 {section['source']} - Section {section['section_number']}"):
+                with st.expander(f"{section['source']} - Section {section['section_number']}"):
                     st.markdown(f"**{section['title']}**")
                     st.markdown(f"```{section['content']}```")
-                    st.markdown(f"🔗 [View Full Section Online]({section['url']})")
+                    st.markdown(f"[View Full Section Online]({section['url']})")
 
         except TaxAnalysisError as e:
-            st.error(f"❌ Analysis Error: {str(e)}")
+            st.error(f"Analysis Error: {str(e)}")
         except Exception as e:
-            st.error(f"❌ Unexpected Error: {str(e)}")
-            logger.error(f"Error processing query: {str(e)}", exc_info=True)
+            st.error(f"Unexpected Error: {str(e)}")
 
     # Sidebar information
     with st.sidebar:
-        st.markdown('<div class="section-header">🔍 About This Tool</div>', unsafe_allow_html=True)
+        st.markdown("### About This Tool")
         st.markdown("""
-        **Key Features:**
-        * 📚 Comprehensive search functionality
-        * 📋 Direct legislative references
-        * 🔗 Source legislation links
-        * 🤖 AI-enhanced interpretation
-        * 📑 Cross-referenced analysis
+        This tool provides:
+        - Search functionality for tax legislation
+        - References to relevant sections
+        - Links to source legislation
+        - AI-assisted interpretation of legislative sections
 
-        **Legislative Coverage:**
-        * 📘 Income Tax Assessment Act 1936
-        * 📗 Income Tax Assessment Act 1997
+        **Coverage:**
+        - Income Tax Assessment Act 1936
+        - Income Tax Assessment Act 1997
         """)
 
-        st.markdown('<div class="section-header">⚖️ Professional Disclaimer</div>', unsafe_allow_html=True)
+        st.markdown("### Important Disclaimer")
         st.markdown("""
-        **Important Legal Notice:**
+        **Please Note:**
 
-        1. **Scope of Service**
-        * 🔍 AI-powered legislative search and interpretation
-        * 📚 Coverage limited to specified Acts
-        * 📋 Analysis based on available content only
-
-        2. **Limitations**
-        * ⚠️ Not formal tax or legal advice
-        * 📅 May not reflect recent changes
-        * 📘 Excludes private rulings and case law
-        * 🔄 Updates cutoff: April 2024
-
-        3. **Professional Advice**
-        * ✔️ Verify information independently
-        * 👨‍💼 Consult qualified tax professionals
-        * 📋 Complex matters need professional review
+        - This tool uses AI to search through embeddings of tax legislation and generate responses
+        - It is not pre-trained on tax law and only searches for close matches in the available text
+        - Responses may not always be accurate or complete
+        - Only covers Income Tax Assessment Acts 1936 and 1997
+        - Does not include other tax legislation, rulings, or case law
+        - Should not be relied upon for tax or legal advice
+        - Always consult with a qualified tax professional for specific advice
         """)
 
 if __name__ == "__main__":
