@@ -165,7 +165,7 @@ def main():
     st.title("⚖️ Australian Tax Legislation Reference")
 
     # API Key handling
-    api_key = os.getenv('OPENAI_API_KEY')
+    api_key = st.secrets["OPENAI_API_KEY"]
     if not api_key:
         api_key = st.text_input("Enter your OpenAI API key:", type="password")
         if not api_key:
