@@ -34,16 +34,13 @@ Before running the application, ensure you have:
 ## 🔧 Installation
 
 1. Clone the repository:
-```bash
 git clone [your-repository-url]
 cd tax-legislation-analysis
 
 2. Install required packages:
-   ```bash
    pip install -r requirements.txt
 
 3. Set up your OpenAI API key:
-   ```bash
    export OPENAI_API_KEY='your-api-key-here'
 
 ## 📦 Required Packages
