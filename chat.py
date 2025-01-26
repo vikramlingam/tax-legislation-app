@@ -1,6 +1,7 @@
 import os
 from openai import OpenAI
 import pandas as pd
+import tiktoken
 from scipy import spatial
 import streamlit as st
 from typing import Optional, Tuple, List, Dict
@@ -30,24 +31,6 @@ def load_data(data_path: str = "tax_embeddings.json") -> Optional[pd.DataFrame]:
     except Exception as e:
         logger.error(f"Error loading data: {e}")
         return None
-
-def rephrase_query(query: str, model: str = "gpt-3.5-turbo") -> str:
-    """Rephrases the input query to improve clarity and ensure alignment with tax terminology."""
-    try:
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": """You are an expert in Australian tax legislation.
-                Rephrase the following query to make it clearer and more comprehensive while retaining the original intent."""},
-                {"role": "user", "content": query}
-            ],
-            temperature=0.3,
-            max_tokens=150
-        )
-        return response.choices[0].message.content.strip()
-    except Exception as e:
-        logger.error(f"Error in query rephrasing: {e}")
-        raise TaxAnalysisError("Failed to rephrase the query.")
 
 def preprocess_query(query: str) -> str:
     """Enhances the query with context and standardizes terminology."""
@@ -136,14 +119,7 @@ def generate_response(
 ) -> Tuple[str, List[Dict]]:
     """Generates a comprehensive response to the tax query."""
     try:
-        # Step 1: Rephrase the query
-        rephrased_query = rephrase_query(query)
-        logger.info(f"Rephrased Query: {rephrased_query}")
-        
-        # Step 2: Preprocess the rephrased query
-        enhanced_query = preprocess_query(rephrased_query)
-        
-        # Step 3: Retrieve relevant sections
+        enhanced_query = preprocess_query(query)
         relevant_sections, scores = get_relevant_sections(
             enhanced_query,
             df,
@@ -154,8 +130,7 @@ def generate_response(
             return ("I apologize, but I couldn't find sufficiently relevant legislative sections to provide an accurate response. "
                    "Please try rephrasing your query or consult a tax professional."), []
 
-        # Step 4: Generate prompt and response
-        prompt = create_analysis_prompt(rephrased_query, relevant_sections)
+        prompt = create_analysis_prompt(query, relevant_sections)
 
         response = client.chat.completions.create(
             model=model,
@@ -210,7 +185,7 @@ def main():
     # Query interface
     query = st.text_area(
         "Enter your tax legislation query:",
-        placeholder="E.g., What are the differences between the prime cost and diminishing value methods?"
+        placeholder="Be specific in your quesiton e.g., According to the ITAA 1997, what are the key differences between the prime cost and diminishing value methods of depreciating an asset??"
     )
 
     # Advanced options
@@ -236,10 +211,6 @@ def main():
                     model=model_choice,
                     top_n=num_results
                 )
-
-            # Display the rephrased query
-            st.markdown("### Rephrased Query")
-            st.markdown(rephrase_query(query))
 
             # Display analysis
             st.markdown("### Analysis")
@@ -276,11 +247,18 @@ def main():
         st.markdown("### Important Disclaimer")
         st.markdown("""
         **Please Note:**
+
         - This tool uses AI to search through embeddings of tax legislation and generate responses
         - It is not pre-trained on tax law and only searches for close matches in the available text
         - Responses may not always be accurate or complete
-        - Always consult a qualified tax professional for specific advice
+        - Only covers Income Tax Assessment Acts 1936 and 1997
+        - Does not include other tax legislation, rulings, or case law
+        - Should not be relied upon for tax or legal advice
+        - Always consult with a qualified tax professional for specific advice
         """)
 
 if __name__ == "__main__":
     main()
+
+# Created/Modified files during execution:
+# Reads from: tax_embeddings.json
