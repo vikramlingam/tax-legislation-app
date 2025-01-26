@@ -183,12 +183,25 @@ def main():
         return
 
     # Query interface
-    query = st.text_area(
-    """Enter your tax legislation query:
-
-Note: To get the most accurate and relevant answers, please be as specific as possible with your query.
-For example, instead of asking 'Tell me about depreciation,' ask 'According to the ITAA 1997, how is the diminishing value method of depreciation calculated?'""",
+    # Query interface
+st.write("Enter your tax legislation query:")
+query = st.text_area(
+    "",
     placeholder="e.g., What are the specific requirements for claiming deductions on prepaid expenses?"
+)
+
+# Explanation of specificity below the text area (in italics)
+st.markdown(
+    """
+*To get the most accurate and relevant answers, please be as specific as possible with your query. 
+For example, instead of asking 'Tell me about depreciation,' ask 'According to the ITAA 1997, how is the diminishing value method of depreciation calculated?'*
+
+*Why be specific?*
+* *Reduces Ambiguity:* Clear questions prevent misinterpretations.
+* *Directs the Search:* Specific queries help the system find the exact information you need within the legislation.
+* *Enables Accurate Extraction:* Precise questions allow for targeted extraction of relevant text from legal documents.
+* *Avoids Generalizations:* Specificity ensures you get detailed answers, not broad overviews.
+"""
 )
 
     # Advanced options
