@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Constants
-GPT_MODELS = ["gpt-3.5-turbo", "gpt-4"]
+GPT_MODELS = ["gpt-3.5-turbo"]
 EMBEDDING_MODEL = "text-embedding-ada-002"
 TOKEN_BUDGET = 4096 - 500
 MIN_SIMILARITY_SCORE = 0.5
