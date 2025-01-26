@@ -173,7 +173,37 @@ def main():
         layout="wide"
     )
 
-    st.title("⚖️ Australian Tax Legislation Reference")
+    # Custom CSS
+    st.markdown("""
+        <style>
+        .main-header {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 1em;
+        }
+        .section-header {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-top: 1em;
+            margin-bottom: 0.5em;
+            color: #1f77b4;
+        }
+        .guidance-text {
+            background-color: #f8f9fa;
+            padding: 1em;
+            border-radius: 5px;
+            margin-bottom: 1em;
+        }
+        .example-query {
+            background-color: #e9ecef;
+            padding: 0.5em;
+            border-left: 3px solid #1f77b4;
+            margin: 0.5em 0;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div class="main-header">⚖️ Australian Tax Legislation Reference</div>', unsafe_allow_html=True)
 
     # API Key handling
     try:
@@ -198,43 +228,56 @@ def main():
         return
 
     # Query interface
+    st.markdown('<div class="section-header">Enter your Tax Legislation Query</div>', unsafe_allow_html=True)
+    
+    st.markdown('<div class="guidance-text">', unsafe_allow_html=True)
+    st.markdown("""
+    **GUIDANCE FOR OPTIMAL RESULTS:**
+    
+    * Be specific and precise in your query formulation
+    * Include relevant legislative references where known
+    * Specify the tax year or time period if applicable
+    * Reference specific provisions or sections if you're aware of them
+    """)
+    
+    st.markdown("**Example Queries:**")
+    st.markdown("""
+    <div class="example-query">✓ "What are the requirements for claiming home office expenses under ITAA 1997?"</div>
+    <div class="example-query">✓ "How is the diminishing value method of depreciation calculated according to Division 40?"</div>
+    <div class="example-query">✓ "What are the criteria for determining residency status for tax purposes under TR 98/17?"</div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    **Your query should focus on specific aspects of:**
+    * Income Tax Assessment Act 1936
+    * Income Tax Assessment Act 1997
+    * Related tax determinations and rulings
+    """)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Query input
     query = st.text_area(
-        label="""Enter your Tax Legislation Query:
-
-GUIDANCE FOR OPTIMAL RESULTS:
-1. Be specific and precise in your query formulation
-2. Include relevant legislative references where known
-3. Specify the tax year or time period if applicable
-4. Reference specific provisions or sections if you're aware of them
-
-Example Queries:
-• "What are the requirements for claiming home office expenses under ITAA 1997?"
-• "How is the diminishing value method of depreciation calculated according to Division 40?"
-• "What are the criteria for determining residency status for tax purposes under TR 98/17?"
-
-Your query should focus on specific aspects of:
-• Income Tax Assessment Act 1936
-• Income Tax Assessment Act 1997
-• Related tax determinations and rulings""",
-        placeholder="Enter your specific tax legislation query here..."
+        label="",
+        placeholder="Enter your specific tax legislation query here...",
+        height=150
     )
 
     # Advanced options
-    with st.expander("Advanced Options"):
+    with st.expander("🔧 Advanced Options"):
         col1, col2, col3 = st.columns([1, 1, 1])
         with col1:
-            num_results = st.slider("Number of relevant sections:", 1, 10, 5)
+            num_results = st.slider("📚 Number of relevant sections:", 1, 10, 5)
         with col2:
-            similarity_threshold = st.slider("Minimum similarity score:", 0.0, 1.0, MIN_SIMILARITY_SCORE)
+            similarity_threshold = st.slider("🎯 Minimum similarity score:", 0.0, 1.0, MIN_SIMILARITY_SCORE)
         with col3:
-            model_choice = st.selectbox("Model", GPT_MODELS, index=1)
+            model_choice = st.selectbox("🤖 Model", GPT_MODELS, index=1)
 
-    if st.button("Search Legislation", type="primary"):
+    if st.button("🔍 Search Legislation", type="primary"):
         if not validate_query(query):
             return
 
         try:
-            with st.spinner("Analyzing your query..."):
+            with st.spinner("📚 Analyzing your query..."):
                 response, relevant_sections = generate_response(
                     query,
                     df,
@@ -247,49 +290,58 @@ Your query should focus on specific aspects of:
                 return
 
             # Display analysis
-            st.markdown("### Analysis")
+            st.markdown('<div class="section-header">📋 Analysis</div>', unsafe_allow_html=True)
             st.markdown(response)
 
             # Display legislative references
-            st.markdown("### Legislative References")
+            st.markdown('<div class="section-header">📖 Legislative References</div>', unsafe_allow_html=True)
             for section in relevant_sections:
-                with st.expander(f"{section['source']} - Section {section['section_number']}"):
+                with st.expander(f"📑 {section['source']} - Section {section['section_number']}"):
                     st.markdown(f"**{section['title']}**")
                     st.markdown(f"```{section['content']}```")
-                    st.markdown(f"[View Full Section Online]({section['url']})")
+                    st.markdown(f"🔗 [View Full Section Online]({section['url']})")
 
         except TaxAnalysisError as e:
-            st.error(f"Analysis Error: {str(e)}")
+            st.error(f"❌ Analysis Error: {str(e)}")
         except Exception as e:
-            st.error(f"Unexpected Error: {str(e)}")
+            st.error(f"❌ Unexpected Error: {str(e)}")
             logger.error(f"Error processing query: {str(e)}", exc_info=True)
 
     # Sidebar information
     with st.sidebar:
-        st.markdown("### About This Tool")
+        st.markdown('<div class="section-header">🔍 About This Tool</div>', unsafe_allow_html=True)
         st.markdown("""
-        This tool provides:
-        - Search functionality for tax legislation
-        - References to relevant sections
-        - Links to source legislation
-        - AI-assisted interpretation of legislative sections
+        **Key Features:**
+        * 📚 Comprehensive search functionality
+        * 📋 Direct legislative references
+        * 🔗 Source legislation links
+        * 🤖 AI-enhanced interpretation
+        * 📑 Cross-referenced analysis
 
-        **Coverage:**
-        - Income Tax Assessment Act 1936
-        - Income Tax Assessment Act 1997
+        **Legislative Coverage:**
+        * 📘 Income Tax Assessment Act 1936
+        * 📗 Income Tax Assessment Act 1997
         """)
 
-        st.markdown("### Important Disclaimer")
+        st.markdown('<div class="section-header">⚖️ Professional Disclaimer</div>', unsafe_allow_html=True)
         st.markdown("""
-        **Please Note:**
+        **Important Legal Notice:**
 
-        - This tool uses AI to search through embeddings of tax legislation and generate responses
-        - It is not pre-trained on tax law and only searches for close matches in the available text
-        - Responses may not always be accurate or complete
-        - Only covers Income Tax Assessment Acts 1936 and 1997
-        - Does not include other tax legislation, rulings, or case law
-        - Should not be relied upon for tax or legal advice
-        - Always consult with a qualified tax professional for specific advice
+        1. **Scope of Service**
+        * 🔍 AI-powered legislative search and interpretation
+        * 📚 Coverage limited to specified Acts
+        * 📋 Analysis based on available content only
+
+        2. **Limitations**
+        * ⚠️ Not formal tax or legal advice
+        * 📅 May not reflect recent changes
+        * 📘 Excludes private rulings and case law
+        * 🔄 Updates cutoff: April 2024
+
+        3. **Professional Advice**
+        * ✔️ Verify information independently
+        * 👨‍💼 Consult qualified tax professionals
+        * 📋 Complex matters need professional review
         """)
 
 if __name__ == "__main__":
