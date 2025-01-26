@@ -1,4 +1,4 @@
-#https://au-tax-bot.streamlit.app
+https://au-tax-bot.streamlit.app
 
 # Australian Tax Legislation Analysis Tool 🔍⚖️
 
@@ -37,3 +37,94 @@ Before running the application, ensure you have:
 ```bash
 git clone [your-repository-url]
 cd tax-legislation-analysis
+
+2. Install required packages:
+   ```bash
+   pip install -r requirements.txt
+
+3. Set up your OpenAI API key:
+   ```bash
+   export OPENAI_API_KEY='your-api-key-here'
+
+## 📦 Required Packages
+
+- `openai`
+- `pandas`
+- `tiktoken`
+- `scipy`
+- `streamlit`
+
+---
+
+## 🚀 Usage
+
+1. Start the application:
+   ```bash
+   streamlit run app.py
+2. Access the web interface at [http://localhost:8501](http://localhost:8501).
+3. Enter your tax-related query in the text area.
+4. Configure advanced options if needed:
+   - Number of relevant sections.
+   - Minimum similarity score.
+   - GPT model selection.
+5. Click **"Analyze Legislation"** to get results.
+
+---
+
+## 💡 Features in Detail
+
+### Query Processing
+
+- Preprocesses and enhances user queries.
+- Adds Australian tax context.
+- Standardizes tax terminology.
+
+### Legislative Analysis
+
+- Retrieves relevant sections using embedding similarity.
+- Filters results based on configurable thresholds.
+- Generates comprehensive analysis using GPT models.
+
+### User Interface
+
+- Intuitive query input.
+- Advanced configuration options.
+- Expandable legislative references.
+- Direct links to source legislation.
+
+---
+
+## ⚠️ Error Handling
+
+- Robust error handling for API issues.
+- Graceful handling of data loading failures.
+- User-friendly error messages.
+- Detailed logging for troubleshooting.
+
+---
+
+## 🔒 Security
+
+- Secure API key handling.
+- Environment variable support.
+- Password-protected API key input.
+
+---
+
+## 📝 Logging
+
+- Comprehensive logging system.
+- Error tracking and reporting.
+- Performance monitoring.
+
+---
+
+## ⚖️ Disclaimer
+
+This tool provides information based on tax legislation but should not be considered as legal or tax advice. Always consult with a qualified tax professional for specific advice about your situation.
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
