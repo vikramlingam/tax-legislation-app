@@ -185,7 +185,7 @@ def main():
     # Query interface
     query = st.text_area(
         "Enter your tax legislation query:",
-        placeholder="Be specific in your quesiton e.g., What are the specific requirements for claiming deductions on prepaid expenses?"
+        placeholder="Be specific in your quesiton e.g., According to the ITAA 1997, what are the key differences between the prime cost and diminishing value methods of depreciating an asset??"
     )
 
     # Advanced options
