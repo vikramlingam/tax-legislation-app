@@ -199,11 +199,24 @@ def main():
 
     # Query interface
     query = st.text_area(
-        label="""Enter your tax legislation query:
+        label="""Enter your Tax Legislation Query:
 
-Note: To get the most accurate and relevant answers, please be as specific as possible with your query.
-For example, instead of asking 'Tell me about depreciation,' ask 'According to the ITAA 1997, how is the diminishing value method of depreciation calculated?'""",
-        placeholder="e.g., What are the specific requirements for claiming deductions on prepaid expenses?"
+GUIDANCE FOR OPTIMAL RESULTS:
+1. Be specific and precise in your query formulation
+2. Include relevant legislative references where known
+3. Specify the tax year or time period if applicable
+4. Reference specific provisions or sections if you're aware of them
+
+Example Queries:
+• "What are the requirements for claiming home office expenses under ITAA 1997?"
+• "How is the diminishing value method of depreciation calculated according to Division 40?"
+• "What are the criteria for determining residency status for tax purposes under TR 98/17?"
+
+Your query should focus on specific aspects of:
+• Income Tax Assessment Act 1936
+• Income Tax Assessment Act 1997
+• Related tax determinations and rulings""",
+        placeholder="Enter your specific tax legislation query here..."
     )
 
     # Advanced options
