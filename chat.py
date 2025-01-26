@@ -185,7 +185,7 @@ def main():
     # Query interface
     query = st.text_area(
         "Enter your tax legislation query:",
-        placeholder="e.g., What are the specific requirements for claiming deductions on prepaid expenses?"
+        placeholder="Be specific in your quesiton e.g., What are the specific requirements for claiming deductions on prepaid expenses?"
     )
 
     # Advanced options
