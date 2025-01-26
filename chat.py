@@ -196,7 +196,7 @@ def main():
         with col2:
             similarity_threshold = st.slider("Minimum similarity score:", 0.0, 1.0, MIN_SIMILARITY_SCORE)
         with col3:
-            model_choice = st.selectbox("Model", GPT_MODELS, index=1)
+            model_choice = st.selectbox("Model", ["gpt-3.5-turbo"])
 
     if st.button("Search Legislation", type="primary"):
         if not query:
