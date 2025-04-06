@@ -4,3 +4,4 @@ pandas
 scipy
 tiktoken
 git-lfs
+numpy
