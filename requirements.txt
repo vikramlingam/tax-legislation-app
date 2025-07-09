@@ -5,3 +5,4 @@ scipy
 tiktoken
 git-lfs
 numpy
+langchain
